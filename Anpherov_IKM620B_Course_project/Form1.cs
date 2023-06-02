@@ -18,6 +18,8 @@ namespace Anpherov_IKM_Course_project
         ToolStripLabel timeLabel;
         ToolStripLabel infoLabel;
         Timer timer;
+        string InputData = String.Empty;
+        delegate void SetTextCallback(string text);
         public Form1()
         {
             InitializeComponent();
@@ -182,6 +184,7 @@ namespace Anpherov_IKM_Course_project
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Application.DoEvents();
             if (MajorObject.Modify)
                 if (MessageBox.Show("Дані не були збережені. Продовжити вихід?", "УВАГА", MessageBoxButtons.YesNo) == DialogResult.No)
                     e.Cancel = true;
@@ -428,6 +431,46 @@ namespace Anpherov_IKM_Course_project
                 if (port.IsOpen) port.Close();
                 button2.Text = "Старт";
                 // button2.Enabled = true;
+            }
+        }
+        void AddData(string text)
+        {
+            listBox1.Items.Add(text);
+        }
+        private void SetText(string text)
+        {
+            if (this.listBox1.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetText);
+                this.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                this.AddData(text);
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox1.Text != "")
+
+            {
+                groupBox2.Enabled = true;
+                button2.Enabled = true;
+            }
+            else
+            {
+                groupBox2.Enabled = false;
+                button2.Enabled = false;
+            }
+        }
+
+        private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            InputData = port.ReadExisting();
+            if (InputData != String.Empty)
+            {
+                SetText(InputData);
             }
         }
     }
